@@ -1,1 +1,12 @@
-Chapter 1:
+---
+title: "Chapter 1"
+output:
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_depth: 2
+    fig_caption: true
+    fig_width:
+---
+
+Managed to install all required packages and knit [Exercise Set 1](./Exercise1.html).
