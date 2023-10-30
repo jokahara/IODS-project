@@ -10,4 +10,4 @@ output:
     fig_width:
 ---
 
-[Chapter1](./Chapter1.html)
+[Chapter 1](./chapter1.html)
