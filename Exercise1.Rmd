@@ -147,10 +147,10 @@ my_datetime <- "2020-12-01 12:00"
 my_datetime
 
 # error that is explained in the book... (you may put '#' in front of it)
-my_datetime - current_datetime
+#my_datetime - current_datetime
 
-current_datetime %>% class()
-my_datetime %>% class()
+#current_datetime %>% class()
+#my_datetime %>% class()
 ```
 
 2.2.4 continued...
@@ -163,13 +163,13 @@ my_datetime_converted
 my_datetime_converted - current_datetime
 
 my_datesdiff <- my_datetime_converted - current_datetime
-my_datesdiff %>% class()
+#my_datesdiff %>% class()
 
 ymd_hm("2021-01-02 12:00") + my_datesdiff
 
 # another error challenge here... (again you may put '#' in front of that afterwards)
-560/my_datesdiff
-560/as.numeric(my_datesdiff)
+#560/my_datesdiff
+#560/as.numeric(my_datesdiff)
 ```
 
 2.2.4 continued...
@@ -278,7 +278,7 @@ gbd_short %>%
 ```{r}
 # do you see what is wrong here? (you may fix it or hide it with '#' afterwards)
 gbd_short %>% 
- filter(year = 1995)
+ filter(year == 1995)
 
 gbd_short %>% 
   filter(year == 1995 | year == 2017)
@@ -411,8 +411,8 @@ mydata$`Nasty column name`
 
 # or
 
-mydata %>% 
- select(`Nasty column name`)
+#mydata %>% 
+ #select(`Nasty column name`)
 ```
 
 2.8 continued...
