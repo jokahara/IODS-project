@@ -1,0 +1,11 @@
+---
+author: "Jaakko Kähärä"
+title: "IODS course project"
+output:
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_depth: 2
+    fig_caption: true
+    fig_width:
+---
