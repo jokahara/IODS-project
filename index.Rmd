@@ -1,13 +1,18 @@
 ---
 author: "Jaakko Kähärä"
-title: "IODS course project"
+navbar:
+  title: "IODS course project"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Chapter 1"
+      href: chapter1.html
 output:
   html_document:
     theme: cosmo
     toc: true
     toc_depth: 2
     fig_caption: true
-    fig_width:
 ---
 
 [Chapter 1](./chapter1.html)
