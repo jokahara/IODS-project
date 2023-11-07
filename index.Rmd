@@ -10,6 +10,7 @@ output:
     fig_width:
 ---
 
-### Course Diary:
+------------------------------------------------------------------------
+# Chapter 1
 
-* [Chapter 1](./chapter1.html)
+```{r child = "chapter1.Rmd"}
