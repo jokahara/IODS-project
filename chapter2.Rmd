@@ -65,13 +65,13 @@ summary(m2)
 P-values for the remaining variables are now smaller, and the model's explanatory power is better.
 There is strong positive correlation between `attitude` and the target variable, but `stra` (strategic learning) has also a small effect.
 
-Multiple R-squared tells how well the variables explain the variation of the target. The value of 0.2048, meaning `attitude` and `stra` explain only 20.48 % of variation of exam points.
+Multiple R-squared tells how well the variables explain the variation of the target. In this case only 20.48 % of variation of exam points is explained by `attitude` and `stra`.
 
 
 We can produce the following diagnostic plots: Residuals vs Fitted values, Normal QQ-plot and Residuals vs Leverage. 
 
 ```{r}
-# draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
+# Choose the plots 1, 2 and 5
 plot(m2, which = c(1))
 plot(m2, which = c(2))
 plot(m2, which = c(5))
