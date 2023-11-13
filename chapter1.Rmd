@@ -1,13 +1,3 @@
----
-title: "Chapter 1"
-output:
-  html_document:
-    theme: cosmo
-    toc: true
-    toc_depth: 2
-    fig_caption: true
-    fig_width:
----
 
 I had used R a little previously, so getting started was easy.
 I managed to install all required packages and knit [Exercise Set 1](./Exercise1.html).

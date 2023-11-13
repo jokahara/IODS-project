@@ -1,0 +1,91 @@
+[Exercise Set 2](./Exercise2.html).
+
+## Data Wrangling
+
+I created "data" folder, and added R script "create_learning2014.R" in the folder. 
+The script reads the learning2014 data from http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt, and creates an analysis dataset which is saved in the data folder as learning2014.csv. 
+
+## Analysis
+
+First we download the learning2014 data. In the file header is given in the first row, and the data separator is ",".
+
+```{r}
+# read data
+students2014 <- read.table("data/learning2014.csv", header = T, sep = ",")
+# print dimesions of the table
+dim(students2014)
+# print first 6 rows
+head(students2014)
+```
+
+Dataset has 7 variables and 166 properties (rows). The variables are:
+
+```{r, echo=FALSE}
+colnames(students2014)
+```
+
+Gender is `M` (Male), or `F` (Female), and age is given in years. Attitude describes the students total attitude toward statistics. Points are students' exam results. `deep`, `surf`, and `stra` are averages taken over the students answers to questions on deep, surface and strategic learning.
+
+Next, we can plot graphical overview of the data using `GGally` and `ggplot2` libraries. The variables are plotted separated in terms of gender.
+
+```{r}
+# access the GGally and ggplot2 libraries
+library(GGally)
+library(ggplot2)
+
+# create a more advanced plot matrix with ggpairs()
+p <- ggpairs(students2014[-1], mapping = aes(col = students2014$gender, alpha = 0.3), 
+             lower = list(combo = wrap("facethist", bins = 20)))
+# draw the plot
+p
+```
+
+The plots in the diagonal show the density distributions of each value (red for female, blue for male). Scatter plots below the diagonal show how each pair of variables are related. 
+
+Above the diagonal are shown total and gender specific correlations between each pair of variables. The number of stars '*' next to each value tells how statistically significant the correlations are.
+The largest total correlation is between `attitude` and `points`. Interestingly, for male there is a very negative correlation between `deep` and `surf`, while for female these two are completely uncorrelated.
+
+We see that `attitude`, `stra`, and `surf` have the largest correlation with `points`. Thus, we choose them as explanatory variables and fit them to a regression model with exam points as the target variable.
+
+```{r}
+# create a regression model with multiple explanatory variables
+m <- lm(points ~ attitude + stra + surf, data = students2014)
+
+# print out a summary of the model
+summary(m)
+```
+Looking at the summary, `surf` is does not have a statistically significant relationship (i.e. p-value is too large) with the target variable.
+We can remove it and refit the model.
+
+```{r}
+m2 <- lm(points ~ attitude + stra, data = students2014)
+summary(m2)
+```
+
+P-values for the remaining variables are now smaller, and the model's explanatory power is better.
+There is strong positive correlation between `attitude` and the target variable, but `stra` (strategic learning) has also a small effect.
+
+Multiple R-squared tells how well the variables explain the variation of the target. The value of 0.2048, meaning `attitude` and `stra` explain only 20.48 % of variation of exam points.
+
+
+We can produce the following diagnostic plots: Residuals vs Fitted values, Normal QQ-plot and Residuals vs Leverage. 
+
+```{r}
+# draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
+plot(m2, which = c(1))
+plot(m2, which = c(2))
+plot(m2, which = c(5))
+```
+
+Explain the assumption
+
+
+
+
+
+
+
+
+
+
+

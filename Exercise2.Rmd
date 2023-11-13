@@ -179,9 +179,9 @@ surface_columns <- select(lrn14, one_of(surface_questions))
 lrn14$surf <- rowMeans(surface_columns)
 
 # select the columns related to strategic learning 
-strategic_columns <- "change me!"
+strategic_columns <- select(lrn14, one_of(strategic_questions))
 # and create column 'stra' by averaging
-
+lrn14$stra <- rowMeans(strategic_columns)
 
 ```
 
@@ -230,11 +230,10 @@ library(dplyr)
 keep_columns <- c("gender","Age","attitude", "deep", "stra", "surf", "Points")
 
 # select the 'keep_columns' to create a new dataset
-learning2014 <- "change me!"
+learning2014 <- lrn14[, keep_columns]
 
 # see the structure of the new dataset
-
-
+learning2014
 
 ```
 
@@ -282,11 +281,10 @@ colnames(learning2014)
 colnames(learning2014)[2] <- "age"
 
 # change the name of "Points" to "points"
-
+colnames(learning2014)[7] <- "points"
 
 # print out the new column names of the data
-
-
+colnames(learning2014)
 
 ```
 
@@ -336,8 +334,8 @@ library(dplyr)
 male_students <- filter(learning2014, gender == "M")
 
 # select rows where points is greater than zero
-learning2014 <- male_students
-
+learning2014 <-filter(male_students, points > 0)
+learning2014
 ```
 
 
@@ -383,7 +381,7 @@ Hints:
 library(ggplot2)
 
 # initialize plot with data and aesthetic mapping
-p1 <- ggplot(learning2014, aes(x = attitude, y = points))
+p1 <- ggplot(learning2014, aes(x = attitude, y = points, col = gender))
 
 # define the visualization type (points)
 p2 <- p1 + geom_point()
@@ -395,10 +393,10 @@ p2
 p3 <- p2 + geom_smooth(method = "lm")
 
 # add a main title
-p4 <- "change me!"
+p4 <- p3 + ggtitle("Student's attitude versus exam points")
 
 # draw the plot!
-
+p4
 
 ```
 
@@ -449,11 +447,11 @@ library(GGally)
 library(ggplot2)
 
 # create a more advanced plot matrix with ggpairs()
-p <- ggpairs(learning2014, mapping = aes(), lower = list(combo = wrap("facethist", bins = 20)))
+p <- ggpairs(learning2014[-1], mapping = aes(col = learning2014$gender, alpha = 0.3), 
+             lower = list(combo = wrap("facethist", bins = 20)))
 
 # draw the plot
-
-
+p
 
 ```
 
@@ -495,10 +493,10 @@ library(ggplot2)
 qplot(attitude, points, data = learning2014) + geom_smooth(method = "lm")
 
 # fit a linear model
-my_model <- lm(points ~ 1, data = learning2014)
+my_model <- lm(points ~ attitude, data = learning2014)
 
 # print out a summary of the model
-
+summary(my_model)
 
 ```
 
@@ -543,10 +541,10 @@ library(ggplot2)
 ggpairs(learning2014, lower = list(combo = wrap("facethist", bins = 20)))
 
 # create a regression model with multiple explanatory variables
-my_model2 <- lm(points ~ attitude + stra, data = learning2014)
+my_model2 <- lm(points ~ attitude + stra + surf, data = learning2014)
 
 # print out a summary of the model
-
+summary(my_model2)
 
 ```
 
@@ -596,7 +594,8 @@ Hint:
 my_model2 <- lm(points ~ attitude + stra, data = learning2014)
 
 # draw diagnostic plots using the plot() function. Choose the plots 1, 2 and 5
-
+par(mfrow = c(2,2))
+plot(my_model2, which = c(1,2,5))
 
 ```
 
@@ -643,13 +642,13 @@ print(m)
 
 # New observations
 new_attitudes <- c("Mia" = 3.8, "Mike"= 4.4, "Riikka" = 2.2, "Pekka" = 2.9)
-new_data <- data.frame(attitude = "change me!")
+new_data <- data.frame(attitude = new_attitudes)
 
 # Print out the new data
 print(new_data)
 
 # Predict the new students exam points based on attitude
-predict(m, newdata = "change me!")
+predict(m, newdata = new_data)
 
 
 ```

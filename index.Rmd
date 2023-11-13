@@ -7,10 +7,21 @@ output:
     toc: true
     toc_depth: 2
     fig_caption: true
-    fig_width:
+    fig_width: 6
+    fig_height: 4
 ---
 
 ------------------------------------------------------------------------
+
 # Chapter 1
 
 ```{r child = "chapter1.Rmd"}
+# link to chapter 1
+```
+
+------------------------------------------------------------------------
+# Chapter 2
+
+```{r child = "chapter2.Rmd"}
+# link to chapter 2
+```

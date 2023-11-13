@@ -375,6 +375,12 @@ display: none;
 <div id="TOC">
 <ul>
 <li><a href="#chapter-1" id="toc-chapter-1">Chapter 1</a></li>
+<li><a href="#chapter-2" id="toc-chapter-2">Chapter 2</a>
+<ul>
+<li><a href="#data-wrangling" id="toc-data-wrangling">Data
+Wrangling</a></li>
+<li><a href="#analysis" id="toc-analysis">Analysis</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -388,6 +394,46 @@ been really slow to update after pushing.</p>
 <p><strong>R for Health Data Science</strong> is helpful for getting
 started, but on some topics I would prefer more information and
 examples. I found Exercise Set 1 a useful companion to the book.</p>
+<hr />
+</div>
+<div id="chapter-2" class="section level1">
+<h1>Chapter 2</h1>
+<p><a href="./Exercise2.html">Exercise Set 2</a>.</p>
+<div id="data-wrangling" class="section level2">
+<h2>Data Wrangling</h2>
+<p>I created “data” folder, and added R script “create_learning2014.R”
+in the folder. The script reads the learning2014 data from <a href="http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt" class="uri">http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt</a>,
+and creates an analysis dataset which is saved in the data folder as
+learning2014.csv.</p>
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<p>First we download the learning2014 data. In the file header is given
+in the first row, and the data separator is “,”.</p>
+<pre class="r"><code># read data
+students2014 &lt;- read.table(&quot;data/learning2014.csv&quot;, header = T, sep = &quot;,&quot;)
+# print dimesions of the table
+dim(students2014)</code></pre>
+<pre><code>## [1] 166   7</code></pre>
+<pre class="r"><code># print first 6 rows
+head(students2014)</code></pre>
+<pre><code>##   gender age attitude points     deep     surf  stra
+## 1      F  53       37     25 3.583333 2.583333 3.375
+## 2      M  55       31     12 2.916667 3.166667 2.750
+## 3      F  49       25     24 3.500000 2.250000 3.625
+## 4      M  53       35     10 3.500000 2.250000 3.125
+## 5      M  49       37     22 3.666667 2.833333 3.625
+## 6      F  38       38     21 4.750000 2.416667 3.625</code></pre>
+<p>Dataset has 7 variables and 166 properties (rows). The variables
+are:</p>
+<pre><code>## [1] &quot;gender&quot;   &quot;age&quot;      &quot;attitude&quot; &quot;points&quot;   &quot;deep&quot;     &quot;surf&quot;     &quot;stra&quot;</code></pre>
+<p>Gender is <code>M</code> (Male), or <code>F</code> (Female), and age
+is given in years. Attitude describes the students total attitude toward
+statistics. Points are students’ exam results. <code>deep</code>,
+<code>surf</code>, and <code>stra</code> are averages taken over the
+students answers to questions on deep, surface and strategic
+learning.</p>
+</div>
 </div>
 
 
