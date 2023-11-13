@@ -1,11 +1,11 @@
 [Exercise Set 2](./Exercise2.html).
 
-## Data Wrangling
+### Data Wrangling
 
 I created "data" folder, and added R script "create_learning2014.R" in the folder. 
 The script reads the learning2014 data from http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt, and creates an analysis dataset which is saved in the data folder as learning2014.csv. 
 
-## Analysis
+### Analysis
 
 First we download the learning2014 data. In the file header is given in the first row, and the data separator is ",".
 
@@ -26,6 +26,8 @@ colnames(students2014)
 
 Gender is `M` (Male), or `F` (Female), and age is given in years. Attitude describes the students total attitude toward statistics. Points are students' exam results. `deep`, `surf`, and `stra` are averages taken over the students answers to questions on deep, surface and strategic learning.
 
+------------------------------------------------------------------------
+
 Next, we can plot graphical overview of the data using `GGally` and `ggplot2` libraries. The variables are plotted separated in terms of gender.
 
 ```{r}
@@ -44,6 +46,8 @@ The plots in the diagonal show the density distributions of each value (red for 
 
 Above the diagonal are shown total and gender specific correlations between each pair of variables. The number of stars '*' next to each value tells how statistically significant the correlations are.
 The largest total correlation is between `attitude` and `points`. Interestingly, for male there is a very negative correlation between `deep` and `surf`, while for female these two are completely uncorrelated.
+
+------------------------------------------------------------------------
 
 We see that `attitude`, `stra`, and `surf` have the largest correlation with `points`. Thus, we choose them as explanatory variables and fit them to a regression model with exam points as the target variable.
 
@@ -65,27 +69,31 @@ summary(m2)
 P-values for the remaining variables are now smaller, and the model's explanatory power is better.
 There is strong positive correlation between `attitude` and the target variable, but `stra` (strategic learning) has also a small effect.
 
-Multiple R-squared tells how well the variables explain the variation of the target. In this case only 20.48 % of variation of exam points is explained by `attitude` and `stra`.
+Multiple R-squared tells how well the variables explain the variation of the target. In this case only 20.48 % of variation of exam points is explained by `attitude` and `stra`. The explanatory power of the model is quite low.
 
+------------------------------------------------------------------------
 
-We can produce the following diagnostic plots: Residuals vs Fitted values, Normal QQ-plot and Residuals vs Leverage. 
+We can use the model produce the following diagnostic plots: Residuals vs Fitted values, Normal QQ-plot and Residuals vs Leverage. 
 
 ```{r}
-# Choose the plots 1, 2 and 5
+# Plot residuals vs fitted values
 plot(m2, which = c(1))
+```
+
+The model assumes a linear regression. If the "Residuals vs Fitted" plot were curved, we might need to include a quadratic term in the model. Based on the plot, a linear model is sufficient. Points 56, 35, and 145 are the biggest outliers.
+
+```{r}
+# Plot Q-Q residuals
 plot(m2, which = c(2))
+```
+
+"Q-Q Residuals" follows fairly closely to the straight line apart from a few outliers. This shows that the prediction errors are close to a normal distribution.
+
+```{r}
+# Plot residuals vs Leverage
 plot(m2, which = c(5))
 ```
 
-Explain the assumption
-
-
-
-
-
-
-
-
-
+Leverage is a measure of how much influence each point has on the model prediction. In "Residuals vs Leverage", we see that all leverage values are small, but some points have a proportionally larger effect.
 
 
