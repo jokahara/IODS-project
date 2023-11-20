@@ -1,0 +1,166 @@
+[Exercise Set 3](exercises/Exercise3.html).
+
+### Data Wrangling
+
+I downloaded data from http://www.archive.ics.uci.edu/dataset/320/student+performance, and added R script `create_alc.R` in the folder. The scrips merges two datasets of student alcohol consumption, and saves the result in the `data` folder as `alc_use.csv`. 
+We only keep students present in both data sets. There are 370 students and 35 varibles in the joined data.
+
+*This data approach student achievement in secondary education of two Portuguese schools. The data attributes include student grades, demographic, social and school related features) and it was collected by using school reports and questionnaires. Two datasets are provided regarding the performance in two distinct subjects: Mathematics (mat) and Portuguese language (por). In [Cortez and Silva, 2008], the two datasets were modeled under binary/five-level classification and regression tasks. Important note: the target attribute G3 has a strong correlation with attributes G2 and G1. This occurs because G3 is the final year grade (issued at the 3rd period), while G1 and G2 correspond to the 1st and 2nd period grades. It is more difficult to predict G3 without G2 and G1, but such prediction is much more useful (see paper source for more details).*
+
+Firstly, we can download and glimpse at the data from `alc_use.csv`:
+
+```{r}
+# access the tidyverse libraries tidyr, dplyr, ggplot2
+library(tidyr); library(dplyr); library(ggplot2)
+# read data
+alc <- read.table("data/alc_use.csv", header = T, sep = ",")
+# glimpse at the data
+glimpse(alc)
+```
+
+### Analysis
+
+The names of variables in the dataset are:
+
+```{r, echo=FALSE}
+colnames(alc)
+```
+
+Two new columns have been added to the joined data:  `alc_use` is the average of the answers related to weekday and weekend alcohol consumption, and `high_use` is set `TRUE` for students for which `alc_use` is greater than 2 (`FALSE` otherwise).
+
+--------------------------------------------------------------------------
+
+
+The purpose of this analysis is to study the relationships between high/low alcohol consumption and some of the other variables in the data. For example, we can create box plots of the final grades (`G3`) in terms of high use:
+
+```{r}
+# initialize a plot of high_use and G3
+g1 <- ggplot(alc, aes(x = high_use, y = G3, col = sex))
+g1 + geom_boxplot() + ylab("grade")
+```
+
+Grades of male high alcohol users are lower on average, but not for females. Because of the high variance in either case, grade itself is not a good predictor of alcohol use.
+
+Here, I chose the following 4 variables in the data which appear to most strongly correlate with alcohol use: `sex`, `absences`, `failures`, and `goout` (frequency of going out with friends). The number of absences can be examined with a boxplot:
+
+```{r}
+# initialize a plot of high_use and absences
+g2 <- ggplot(alc, aes(x = high_use, y = absences, col = sex))
+g2 + geom_boxplot() + ylab("absences")
+```
+High alcohol use correlates positively with the number absences. 
+
+Similar results can be seen with the number of class failures and frequency of going out with friends. We can examining the effect of `goout` and `failures` by creating separate bar plots for low and high use.
+
+```{r}
+# initialize a bar plot of high_use and goout
+g1 <- ggplot(alc, aes(x = goout, fill=sex)) + geom_bar()
+g1 + facet_wrap("high_use")
+
+g2 <- ggplot(alc, aes(x = failures, fill=sex)) + geom_bar()
+g2 + facet_wrap("high_use")
+```
+For `failures` the correlation is not as noticeable, so we can also use `group_by()` to calculate the average number of class failures (divided by sex).
+
+```{r, echo=FALSE}
+alc %>% group_by(sex, high_use) %>% summarise(count = n(), fail = mean(failures), absent = mean(absences))
+```
+
+
+------------------------------------------------------------------------
+
+Next, we use logistic regression to statistically explore the relationship between the chosen variables and the binary high/low alcohol consumption variable as the target variable. 
+
+```{r, echo=FALSE}
+m <- glm(high_use ~ sex + absences + failures + goout, data = alc, family = "binomial")
+# Summarise the model
+summary(m)
+```
+
+Variable `goout` has lowest p-value, meaning it most explanatory power in the model. `sex` and `absences` also have a high significance, while "failures" has a fairly low significance (high p-value).
+
+The computational target variable in the logistic regression model is the log of odds:
+$$\log\left( \frac{p}{1 - p} \right).$$
+Therefore we apply the exponent function to obtain the modeled ratios of propabilities:
+
+```{r}
+# compute odds ratios (OR)
+OR <- coef(m) %>% exp
+
+# compute confidence intervals (CI)
+CI <- confint(m)
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+```
+
+
+---------------------------------------------------------------------
+
+We can add prediction probabilities and predicted values (`TRUE` or `FALSE`) to the table, and perform 2x2 cross tabulation of predictions versus the actual values.
+
+```{r}
+# add prediction probabilities and predicted values (TRUE or FALSE)
+alc <- mutate(alc, probability = predict(m, type = "response"))
+alc <- mutate(alc, prediction = probability > 0.5)
+
+# tabulate the target variable versus the predictions
+table(high_use = alc$high_use, prediction = alc$prediction)
+```
+
+In the table, inaccurately classified individuals are found in the off-diagonal values. 
+
+```{r}
+# table of proportional values
+t <- table(high_use = alc$high_use, prediction = alc$prediction) %>% prop.table() %>% addmargins()
+t
+# total fail rate
+(t[1,2] + t[2,1])
+```
+
+The training error (i.e. the percentage of wrong predictions) is 20.8%. The prediction accuracy is not too bad.
+
+However, we can simplify the model by dropping both `failures` and `absences`:
+
+```{r}
+m <- glm(high_use ~ sex + goout, data = alc, family = "binomial")
+# Summarise the model
+summary(m)
+
+alc <- mutate(alc, probability = predict(m, type = "response"))
+alc <- mutate(alc, prediction = probability > 0.5)
+
+# table of proportional values
+t <- table(high_use = alc$high_use, prediction = alc$prediction) %>% prop.table() %>% addmargins()
+# total fail rate
+(t[1,2] + t[2,1])
+```
+
+Failure rate is very similar at 21.3%, so clearly not all variables are necessary needed to get good predictions.
+
+----------------------------------------------------------------------
+
+Finally, let's perform 10-fold cross-validation on the original model:
+
+```{r}
+# loss function (average prediction error)
+loss_func <- function(class, prob) {
+  n_wrong <- abs(class - prob) > 0.5
+  mean(n_wrong)
+}
+
+# K-fold cross-validation
+library(boot)
+cv <- cv.glm(data = alc, cost = loss_func, glmfit = m, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+
+The error rate varies between runs, but on average it is around 21%. This model is clearly better than the one introduced in Exercise Set 3.
+
+
+
+
+
+

@@ -26,3 +26,11 @@ output:
 ```{r child = "chapter2.Rmd"}
 # link to chapter 2
 ```
+
+------------------------------------------------------------------------
+
+# Chapter 3
+
+```{r child = "chapter3.Rmd"}
+# link to chapter 3
+```

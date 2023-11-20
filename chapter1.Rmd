@@ -1,6 +1,6 @@
 
 I had used R a little previously, so getting started was easy.
-I managed to install all required packages and knit [Exercise Set 1](./Exercise1.html).
+I managed to install all required packages and knit [Exercise Set 1](exercises/Exercise1.html).
 
 Dealing with Github has been quite annoying because the website has been really slow to update after pushing.
 

@@ -1,4 +1,4 @@
-[Exercise Set 2](./Exercise2.html).
+[Exercise Set 2](exercises/Exercise2.html).
 
 ### Data Wrangling
 
