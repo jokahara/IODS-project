@@ -34,3 +34,14 @@ output:
 ```{r child = "chapter3.Rmd"}
 # link to chapter 3
 ```
+
+
+------------------------------------------------------------------------
+
+# Chapter 4
+
+```{r child = "chapter4.Rmd"}
+# link to chapter 4
+```
+
+
