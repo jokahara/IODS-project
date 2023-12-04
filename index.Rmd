@@ -35,13 +35,20 @@ output:
 # link to chapter 3
 ```
 
-
 ------------------------------------------------------------------------
 
 # Chapter 4
 
 ```{r child = "chapter4.Rmd"}
 # link to chapter 4
+```
+
+------------------------------------------------------------------------
+
+# Chapter 5
+
+```{r child = "chapter5.html", echo=FALSE}
+# link to chapter 5
 ```
 
 

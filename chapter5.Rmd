@@ -1,0 +1,137 @@
+[Exercise Set 5](exercises/Exercise5.html).
+
+### Data Wrangling (continued)
+
+Further data manipulation is done in `create_human.csv`, and dataset `human.csv` is saved to `data` folder. There are now 155 observations and 9 variables.
+We excluded unneeded variables, and then filtered out rows with missing (`NA`) values or which relate to regions instead of countries. 
+
+------------------------------------------------------------------------
+
+### Analysis
+
+We open the `human` data and move the country names to row names:
+
+```{r}
+# access libraries
+library(tidyr); library(dplyr); library(ggplot2); library(readr)
+# read data from human.csv
+human <- read_csv('data/human.csv', show_col_types = FALSE)
+
+library(tibble)
+human <- column_to_rownames(human, "Country")
+```
+
+We can summarise the data with `ggplot` and `corrplot`:
+
+```{r}
+library(GGally);library(corrplot)
+
+# visualize the variables
+ggpairs(human)
+
+# compute the correlation matrix and visualize it with corrplot
+cor(human) %>% corrplot()
+```
+
+We can deduce that life expectancy at birth `Life.Exp` has a strong positive correlation with expected years of schooling `Edu.Exp`.
+On the other had maternal mortality ratio `Mat.Mor` and adolescent birth rate `Ado.Birth` have a strong negative correlation with `Life.Exp` and `Edu.Exp`. Gross national income per capita `GNI` shows similar, though weaker, correlations. 
+Percentange of female representatives in parliament `Parli.F`, and relative labor force participation `Labo.FM` correlate with each other but not very significantly with other variables.
+
+------------------------------------------------------------------------
+
+### Principal component analysis (PCA)
+
+```{r}
+# perform principal component analysis (with the SVD method)
+pca_human <- prcomp(human)
+s <- summary(pca_human)
+
+# draw a biplot
+biplot(pca_human, choices = 1:2, cex = c(1, 0.8), col = c("grey40", "deeppink2"))
+```
+
+
+PC1 and PC2 are the two most significant axis found by PCA. The percentages of variables are shown is brackets. Pink arrows represent the original variables. 
+Unfortunately, the plot is useless, because `GNI` values are much larger than other variables causing PCA to overvalue its impact. 
+
+------------------------------------------------------------------------
+
+We standardize the data and perform PCA again
+
+```{r}
+# Standardize data, and perform PCA
+pca_human <- prcomp(scale(human))
+s <- summary(pca_human)
+
+# rounded percentages of variance captured by each PC
+pca_pr <- round(100*s$importance[2, ], digits = 1)
+# axis labels
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+
+# draw a biplot
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"), xlab = pc_lab[1], ylab = pc_lab[2])
+
+
+```
+
+The lengths of the arrows are now equal because the variables have same standard deviations.
+The labels are not very clear, but `Parli.F` and `Labo.FM` dominate in the PC2 axis and the other variables in the PC1 axis with directions of arrows corresponding with positive and negative correlations. 
+
+We can deduce that, not very surprisingly, people in more developed countries are better educated, have higher life expectancy, and have better healthcare outcomes (lower maternal mortality). Additionally, countries were women make a larger percentage of the workforce, also have more female representatives, but this does not necessarily indicate higher development.
+
+------------------------------------------------------------------------
+
+### Multiple Correspondence Analysis (MCA)
+
+Next, we want to analyze the tea data from the FactoMineR package. 
+
+```{r}
+# read tea data
+tea <- read.csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/tea.csv", stringsAsFactors = TRUE)
+
+str(tea)
+dim(tea)
+```
+
+There are 300 observables and 36 variables. We pick 6 of the variables for analysis.
+
+```{r}
+# column names to keep in the dataset
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+tea_time <- select(tea, any_of(keep_columns))
+
+# a quick look at the data
+summary(tea_time)
+
+# visualizing the dataset
+library(ggplot2)
+pivot_longer(tea_time, cols = everything()) %>% 
+  ggplot(aes(value)) + geom_bar() + facet_wrap("name", scales = "free") + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+
+```
+
+We perform Multiple Correspondence Analysis on the dataset:
+
+```{r}
+# multiple correspondence analysis
+library(FactoMineR)
+mca <- MCA(tea_time, graph = FALSE)
+# summary of the model
+summary(mca)
+
+```
+
+Like with PCA we can draw a biplot of results. 
+
+```{r}
+# visualize MCA
+plot(mca, invisible=c("ind"), graph.type = "classic", habillage = "quali")
+
+```
+
+We can see some correlation on how people consume tea, for example, at a tea shop, tea comes unpackaged.
+However, Dim 1 and 2 cover a fairly small percentage of variances, so does not tell much about the correlations.
+There is some difference between tea types and additives but enough to draw conclusions.
+
+------------------------------------------------------------------------
+
