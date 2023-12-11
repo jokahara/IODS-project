@@ -21,7 +21,7 @@ First, let's plot the rat weight trendlines for each group:
 
 ```{r}
 # access libraries
-library(tidyr); library(dplyr); library(ggplot2); library(readr); library(lme4)
+library(tidyr); library(dplyr); library(ggplot2); library(readr);
 
 # Plotting data
 ggplot(RATS, aes(x = Time, y = Weight, linetype = ID)) +
@@ -139,12 +139,74 @@ P-value is not significant for between groups.
 
 ### BPRS Analysis
 
+Plotting BPRS per treatment group:
+
+```{r}
+ggplot(BPRS, aes(x = week, y = bprs, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(BPRS$bprs), max(BPRS$bprs)))
+```
+
+First we can fit a multiple linear regression model:
+
+```{r}
+# create a regression model
+fit <- lm(bprs ~ week + treatment, data = BPRS)
+# print out a summary of the model
+summary(fit)
+```
+
+There significant difference over time, but not with different treatments.
 
 
 
+The previous model assumes independence of the repeated measures of weight, and this assumption is highly unlikely. So, now we will move on to consider both some more appropriate graphics and appropriate models.
+
+To begin the more formal analysis of the rat growth data, we will first fit the random intercept model for the same two explanatory variables: Time and Group. Fitting a random intercept model allows the linear regression fit for each rat to differ in intercept from other rats.
+
+We will use the lme4 package which offers efficient tools for fitting linear and generalized linear mixed-effects models. 
+
+```{r}
+# access library lme4
+library(lme4)
+# Create a random intercept model
+fit <- lmer(bprs ~ week + treatment + (1 | subject), data = BPRS, REML = FALSE)
+# Print the summary of the model
+summary(fit)
+
+```
+
+Now we can move on to fit the random intercept and random slope model to the data. Fitting a random intercept and random slope model allows the linear regression fits for each individual to differ in intercept but also in slope. This way it is possible to account for the individual differences in the rats’ growth profiles, but also the effect of time.
 
 
+```{r}
+fit <- lmer(bprs ~ week + treatment + (week | subject), data = BPRS, REML = FALSE)
+summary(fit)
+```
 
+```{r}
+fit <- lmer(bprs ~ week + treatment + (week | subject) + week*treatment, data = BPRS, REML = FALSE)
+summary(fit)
+```
+
+```{r}
+# Create a vector of the fitted values
+Fitted <- fitted(fit)
+
+# Create a new column fitted
+BPRS <- BPRS %>% mutate(Fitted = Fitted)
+
+ggplot(BPRS, aes(x = week, y = Fitted, linetype = subject)) +
+  geom_line() +
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ treatment, labeller = label_both) +
+  theme(legend.position = "none") + 
+  scale_y_continuous(limits = c(min(BPRS$bprs), max(BPRS$bprs)))
+
+```
 
 
 
