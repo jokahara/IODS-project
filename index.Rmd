@@ -51,4 +51,12 @@ output:
 # link to chapter 5
 ```
 
+------------------------------------------------------------------------
+
+# Chapter 6
+
+```{r child = "chapter6.html", echo=FALSE}
+# link to chapter 6
+```
+
 

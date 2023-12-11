@@ -1,0 +1,150 @@
+[Exercise Set 6](exercises/Exercise6.html).
+
+### Data Wrangling
+
+We prepare BPRS and RATS datasets in `meet_and_repeat.R` and save them in `data` folder.
+
+`BPRS` contains 40 male subjects were randomly assigned to one of two treatment groups and each subject was rated on the brief psychiatric rating scale (BPRS) measured before treatment began (week 0) and then at weekly intervals for eight weeks. The BPRS is used to evaluate patients suspected of having schizophrenia.
+
+`RATS` data is from a nutrition study conducted in three groups of rats. The groups were put on different diets, and each animal’s body weight (grams) was recorded over a 9-week period (two times in week 7). The question of most interest is whether the growth profiles of the three groups differ.
+
+```{r}
+# run meet_and_repeat.R to initialize both datasets
+source("data/meet_and_repeat.R", local = knitr::knit_global())
+```
+
+------------------------------------------------------------------------
+
+### RATS Analysis
+
+First, let's plot the rat weight trendlines for each group:
+
+```{r}
+# access libraries
+library(tidyr); library(dplyr); library(ggplot2); library(readr); library(lme4)
+
+# Plotting data
+ggplot(RATS, aes(x = Time, y = Weight, linetype = ID)) +
+  geom_line() + 
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+  scale_y_continuous(name = "Weight (grams)") +
+  theme(legend.position = "none")
+```
+
+The initial weights differ between groups, so we should also look at standardized values.
+
+```{r}
+# mutate to add stdweights column 
+RATS <- RATS %>%
+  group_by(Time) %>%
+  mutate(StdW = (Weight - mean(Weight))/sd(Weight) ) %>%
+  ungroup()
+
+ggplot(RATS, aes(x = Time, y = StdW, linetype = ID)) +
+  geom_line() + 
+  scale_linetype_manual(values = rep(1:10, times=4)) +
+  facet_grid(. ~ Group, labeller = label_both) +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+  scale_y_continuous(name = "Weight (standardized)") +
+  theme(legend.position = "none")
+```
+
+Rats with larger initial weight tend to gain weight faster. After standardization this is not necessarily so.
+
+We can also create a summary graph for each group, by adding mean and standard error columns to the dataset, and plotting the trends with errorbars:
+
+```{r}
+# summary dataset
+RATSS <- RATS %>%
+  group_by(Group, Time) %>%
+  summarise( mean = mean(Weight), se = sd(Weight)/sqrt(length(Weight)) ) %>%
+  ungroup()
+
+ggplot(RATSS, aes(x = Time, y = mean, linetype = Group, shape = Group)) +
+  geom_line() +
+  scale_linetype_manual(values = c(1,2,3)) +
+  geom_point(size=3) +
+  scale_shape_manual(values = c(1,2,3)) +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
+  theme(legend.position = 'right') +
+  scale_y_continuous(name = "mean(Weight) +/- se(Weight)")
+```
+
+Repeating with stadardized weights:
+
+```{r}
+# summary dataset
+RATSS <- RATS %>%
+  group_by(Group, Time) %>%
+  summarise( mean = mean(StdW), se = sd(StdW)/sqrt(length(StdW)) ) %>%
+  ungroup()
+
+ggplot(RATSS, aes(x = Time, y = mean, linetype = Group, shape = Group)) +
+  geom_line() +
+  scale_linetype_manual(values = c(1,2,3)) +
+  geom_point(size=3) +
+  scale_shape_manual(values = c(1,2,3)) +
+  geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3) +
+  theme(legend.position = 'right') +
+  scale_y_continuous(name = "mean(StdW) +/- se(StdW)")
+```
+Boxplots of weights for each group:
+
+```{r}
+RATSS <- RATS %>%
+  group_by(Group, Time) %>%
+  summarise( mean = mean(Weight) ) %>%
+  ungroup()
+
+ggplot(RATSS, aes(x = Group, y = mean)) +
+  geom_boxplot() +
+  stat_summary(fun = "mean", geom = "point", shape=23, size=4, fill = "white") +
+  scale_y_continuous(name = "mean(Week)")
+```
+Boxplots don't have massive outliers (although one rat in group 2 could be considered one). 
+
+Next, we apply a t-test to assess any difference between the groups, and also calculate a confidence interval for this difference. There are 3 groups so I performed the t-test for groups 2 and 3.
+
+```{r}
+RATS2 <- RATS %>%
+  filter(Time > 1) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(Weight) ) %>%
+  ungroup()
+
+# Perform a two-sample t-test
+t.test(mean ~ Group, data = filter(RATS2, RATS2$Group != 1), var.equal = TRUE)
+```
+There is no significant evidence for difference between groups. Also the 95% confidence interval is wide and includes the zero, allowing for similar conclusions to be made.
+
+We can also fit a linear model and compute the analysis of variance (ANOVA) for the model.
+
+```{r}
+# Add the baseline from the original data as a new variable to the summary data
+RATS1 <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", sep ="\t", header = T)
+RATS2 <- RATS2 %>% mutate(baseline = RATS1$WD1)
+
+# Fit the linear model with the mean as the response 
+fit <- lm(mean ~ baseline + Group, data = RATS2)
+
+# Compute the analysis of variance table for the fitted model with anova()
+anova(fit)
+```
+
+P-value is not significant for between groups.
+
+------------------------------------------------------------------------
+
+### BPRS Analysis
+
+
+
+
+
+
+
+
+
+
