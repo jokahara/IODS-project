@@ -159,15 +159,9 @@ fit <- lm(bprs ~ week + treatment, data = BPRS)
 summary(fit)
 ```
 
-There significant difference over time, but not with different treatments.
+There is a significant p-value difference over time, but not with different treatments.
 
-
-
-The previous model assumes independence of the repeated measures of weight, and this assumption is highly unlikely. So, now we will move on to consider both some more appropriate graphics and appropriate models.
-
-To begin the more formal analysis of the rat growth data, we will first fit the random intercept model for the same two explanatory variables: Time and Group. Fitting a random intercept model allows the linear regression fit for each rat to differ in intercept from other rats.
-
-We will use the lme4 package which offers efficient tools for fitting linear and generalized linear mixed-effects models. 
+The previous model assumes independence of the repeated measures of weight, and this assumption is highly unlikely. So, now we will move on to consider both some more appropriate graphics and appropriate models. We will first fit the random intercept model for the same two explanatory variables using lme4 package. Fitting a random intercept model allows the linear regression fit for each subject to differ in intercept from other subjects.
 
 ```{r}
 # access library lme4
@@ -179,18 +173,14 @@ summary(fit)
 
 ```
 
-Now we can move on to fit the random intercept and random slope model to the data. Fitting a random intercept and random slope model allows the linear regression fits for each individual to differ in intercept but also in slope. This way it is possible to account for the individual differences in the rats’ growth profiles, but also the effect of time.
-
-
-```{r}
-fit <- lmer(bprs ~ week + treatment + (week | subject), data = BPRS, REML = FALSE)
-summary(fit)
-```
+Now we can move on to fit the random intercept and random slope model `(week | subject)` to the data. Fitting a random intercept and random slope model allows the linear regression fits for each individual to differ in intercept but also in slope. This way it is possible to account for the individual differences in the subject's profiles, but also the effect of time. We also allow for a `week` * `treatment` interaction.
 
 ```{r}
 fit <- lmer(bprs ~ week + treatment + (week | subject) + week*treatment, data = BPRS, REML = FALSE)
 summary(fit)
 ```
+
+Plotting the fitted we can see that the model did not find difference between the two groups:
 
 ```{r}
 # Create a vector of the fitted values

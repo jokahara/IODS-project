@@ -587,19 +587,15 @@ summary(fit)</code></pre>
 ## Residual standard error: 12.37 on 357 degrees of freedom
 ## Multiple R-squared:  0.1851, Adjusted R-squared:  0.1806 
 ## F-statistic: 40.55 on 2 and 357 DF,  p-value: &lt; 2.2e-16</code></pre>
-<p>There significant difference over time, but not with different
-treatments.</p>
+<p>There is a significant p-value difference over time, but not with
+different treatments.</p>
 <p>The previous model assumes independence of the repeated measures of
 weight, and this assumption is highly unlikely. So, now we will move on
-to consider both some more appropriate graphics and appropriate
-models.</p>
-<p>To begin the more formal analysis of the rat growth data, we will
-first fit the random intercept model for the same two explanatory
-variables: Time and Group. Fitting a random intercept model allows the
-linear regression fit for each rat to differ in intercept from other
-rats.</p>
-<p>We will use the lme4 package which offers efficient tools for fitting
-linear and generalized linear mixed-effects models.</p>
+to consider both some more appropriate graphics and appropriate models.
+We will first fit the random intercept model for the same two
+explanatory variables using lme4 package. Fitting a random intercept
+model allows the linear regression fit for each subject to differ in
+intercept from other subjects.</p>
 <pre class="r"><code># access library lme4
 library(lme4)</code></pre>
 <pre><code>## Loading required package: Matrix</code></pre>
@@ -640,41 +636,12 @@ summary(fit)</code></pre>
 ## week       -0.437       
 ## treatment2 -0.282  0.000</code></pre>
 <p>Now we can move on to fit the random intercept and random slope model
-to the data. Fitting a random intercept and random slope model allows
-the linear regression fits for each individual to differ in intercept
-but also in slope. This way it is possible to account for the individual
-differences in the rats’ growth profiles, but also the effect of
-time.</p>
-<pre class="r"><code>fit &lt;- lmer(bprs ~ week + treatment + (week | subject), data = BPRS, REML = FALSE)
-summary(fit)</code></pre>
-<pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
-## Formula: bprs ~ week + treatment + (week | subject)
-##    Data: BPRS
-## 
-##      AIC      BIC   logLik deviance df.resid 
-##   2745.4   2772.6  -1365.7   2731.4      353 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -2.8919 -0.6194 -0.0691  0.5531  3.7976 
-## 
-## Random effects:
-##  Groups   Name        Variance Std.Dev. Corr 
-##  subject  (Intercept) 64.8222  8.0512        
-##           week         0.9609  0.9802   -0.51
-##  Residual             97.4305  9.8707        
-## Number of obs: 360, groups:  subject, 20
-## 
-## Fixed effects:
-##             Estimate Std. Error t value
-## (Intercept)  46.4539     2.1052  22.066
-## week         -2.2704     0.2977  -7.626
-## treatment2    0.5722     1.0405   0.550
-## 
-## Correlation of Fixed Effects:
-##            (Intr) week  
-## week       -0.582       
-## treatment2 -0.247  0.000</code></pre>
+<code>(week | subject)</code> to the data. Fitting a random intercept
+and random slope model allows the linear regression fits for each
+individual to differ in intercept but also in slope. This way it is
+possible to account for the individual differences in the subject’s
+profiles, but also the effect of time. We also allow for a
+<code>week</code> * <code>treatment</code> interaction.</p>
 <pre class="r"><code>fit &lt;- lmer(bprs ~ week + treatment + (week | subject) + week*treatment, data = BPRS, REML = FALSE)
 summary(fit)</code></pre>
 <pre><code>## Linear mixed model fit by maximum likelihood  [&#39;lmerMod&#39;]
@@ -707,6 +674,8 @@ summary(fit)</code></pre>
 ## week        -0.650              
 ## treatment2  -0.424  0.469       
 ## wek:trtmnt2  0.356 -0.559 -0.840</code></pre>
+<p>Plotting the fitted we can see that the model did not find difference
+between the two groups:</p>
 <pre class="r"><code># Create a vector of the fitted values
 Fitted &lt;- fitted(fit)
 
